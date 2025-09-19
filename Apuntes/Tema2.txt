@@ -1,3 +1,12 @@
 -----------------------------------------------------------------------------------------------------------------------
 TEMA 2: SISTEMA DE FICHEROS.
 -----------------------------------------------------------------------------------------------------------------------
+//Terminal:
+stat miid // Info del i-nodo y demas.
+ls -l /dev/ | grep 254 // En donde del disco esta???
+// Podemos sacar el 254 (que es el dispositivo donde esta) hacemos:
+ls -l /dev/ | grep $(stat miiid.c | Device | cut -d ':' 2 | cut -d ',' -f1) 
+// Se corta tanto porque "stat miid.c | Device" 
+// escribe "Device: 254,2 Inode: xxx, Links: 1" y nos queremos quedar solo con el 254.
+// Se puede preguntar si mezcla Tema1 con Tema2.
+ls -a // Te enseña todos los ficheros, los ocultos tambien.
