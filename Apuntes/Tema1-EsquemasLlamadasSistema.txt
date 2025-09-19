@@ -1,0 +1,72 @@
+TEMA 1: parte deesquemas de uso de llamadas al sistema.
+//Terminal:
+man 2 uname // Saca la llamada al sistema del comando. Importante el return value. Al fallo devuelve -1.
+-----------------------------------------------------------------------------------------------------------------------
+//C: un ejercio de la hoja 2 es esto.
+#include <sys/utsname.h>
+#include <studio.h>
+
+int main()
+{
+	//struct utsname *buf;
+	//int rc = uname(buf); // buf no esta inicializado entonces pasarle la direccion de memoria pues como que no.
+	// Entonces:
+	//struct utsname *buf = malloc; // Inicializar el puntero con malloc pero es demasiado.
+	
+	struct utsname buf;
+	int rc = uname(&buf) // Lo declaramos en la pila y le pasamos la direccion. Normalmente si nos piden una referencia le tendremos que pasar la direccion.
+	printf("Nodename: %s\n, buf.nodename) // % = modificador de printf para cadenas de texto. Escribe hasta que encuentre un \0 en la cadena de texto.
+
+
+	return 0;
+}
+//Terminal
+gcc -D_GNU_SOURCE -o miuname
+-----------------------------------------------------------------------------------------------------------------------
+Los procesos tiene un identificador de usuario (UID) que es el propietario del proceso.
+//Terminal:
+less /etc/passwd
+sudo less /etc/shadow // Las contrseñas.
+id
+man 3 getpwnam // Devuelve un puntero. Al fallo que le pasas algo que no esta devuelve un null.
+//C: miid.c
+#include <sys/types.h>
+#include <pwd.h>
+#include <studio.h>
+#include <stdlib.h>
+// Lo que quiero es hacer "miid 0" y que de "Usuario: root".
+int main(int argc, char *argv[])
+{
+	uid_t uid = toi(argv[1]); // Cogemos el argumento 1 que le pasamos al ejecutar. Hay que pasarlo de cadena a entero. Con atoi.
+	
+	struct passwd *getpwuid(uid_t uid);
+		/*getpwuid() esta hecho asi: Esta funcipon no es reentrante. No se espera un resultado similiar si se llama de manera concurrente en multithreads (creo +-). Las  funciones reentrantes acaban en "_r" y se les pasa un buffer y su tamaño.
+			{static struct passwd pw; // Se hace variable global pero solo se puede usar aqui dentro y al salir del metodo no se borra enotnces podemos usar su direccion.
+			pw.pw_name = "Paigro";
+			return &pw;}
+		*/
+	struct passwd *pw; // Lo definimos como puntero.
+	if(pw == NULL)
+	{
+		perror("getpwduid());
+		return 1;
+	}
+	printf("Nombre: %s\n", pw->pw_name);
+	printf("UID: %s\n", pw->pw_uid);	
+
+	return 0;
+}
+Dos patrones de llamadas al sistema: o con buffers o con punteros.
+//Terminal:
+gcc -o miid miid.c
+./miid 0
+// Escribe: "Nombre: root UID: 0"
+-----------------------------------------------------------------------------------------------------------------------
+Se pueden preguntar llamadas al sistema, uso de comandos.
+La lista de comandos y su significado o man o nos lo da.
+Hay codigo de ejemplo en las paginas del manual.
+-----------------------------------------------------------------------------------------------------------------------
+FIN TEMA 1.
+-----------------------------------------------------------------------------------------------------------------------
+
+
