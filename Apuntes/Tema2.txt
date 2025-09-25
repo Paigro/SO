@@ -10,3 +10,11 @@ ls -l /dev/ | grep $(stat miiid.c | Device | cut -d ':' 2 | cut -d ',' -f1)
 // escribe "Device: 254,2 Inode: xxx, Links: 1" y nos queremos quedar solo con el 254.
 // Se puede preguntar si mezcla Tema1 con Tema2.
 ls -a // Te enseña todos los ficheros, los ocultos tambien.
+-----------------------------------------------------------------------------------------------------------------------
+PERMISOS: cadena de 10 caracteres. El primero indica si es archivo(-) o directorio (d)
+El resto, de 3 en 3, son los permisos para el Usuario (u), Grupo(g) y Otros Ususarios (o).
+Los permisos son de lectura(r), escritura (w), ejecucion (x) y ninguno (-).
+Para cambiar permisos con:
+//chmod o + x // Le da a otros el permiso de ejcucion.
+Para manera octal: 1 reprenta x, 2 reprenseta w y 4 representa r. La suma de estos valores
+sirve para ejecutar chmod (chmod 741 da todos al u, w a g y x a o).
