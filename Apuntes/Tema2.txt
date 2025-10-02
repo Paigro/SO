@@ -73,3 +73,6 @@ ln // Para crear enlaces. Se añade -s para enlace simbolico.
 ln prueba duro // Crea un enlace que se llama duro.
 ln -s ./prueba unenlace // Crea un enlace simbolico llamado unenlace con la ruta relativa puesta.
 // Tras esto solo habra 2 ficheros: el fichero al que apuntan prueba y duro y el fichero unenlace.
+-----------------------------------------------------------------------------------------------------------------------
+//Terminal:
+file $(ls -a) // Muestra los tipos de archivo que le da ls -a.
