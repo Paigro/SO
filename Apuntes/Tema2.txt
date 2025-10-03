@@ -1,10 +1,10 @@
------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------
 TEMA 2: SISTEMA DE FICHEROS.
------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------
 FICHEROS:
 Se componen de el inodo que es con sus bloques de datos.
 Para sacar el inodo con: {stat x} o {ls -i}.
------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------
 //Terminal:
 stat miid // Info del i-nodo y demas.
 ls -l /dev/ | grep 254 // En donde del disco esta???
@@ -14,7 +14,7 @@ ls -l /dev/ | grep $(stat miiid.c | Device | cut -d ':' 2 | cut -d ',' -f1)
 // escribe "Device: 254,2 Inode: xxx, Links: 1" y nos queremos quedar solo con el 254.
 // Se puede preguntar en el examen, si mezcla Tema1 con Tema2.
 ls -a // Te enseña todos los ficheros, los ocultos tambien.
------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------
 PERMISOS:
 Cadena de 10 caracteres. El primero indica si es archivo(-) o directorio (d), fichero de bloques (b),
 fichero de caracteres (c) o para Enlaces (l).
@@ -28,29 +28,29 @@ La suma de estos valores sirve para ejecutar {chmod} ({chmod 741} da todos al 'u
 A usuario se refiere al propietario del fichero y al grupo propietario.
 Los permisos de ejcucion para directorios permiten o no hacer cd al directorio.
 Borrar un fichero de un directorio depende de los permisos del directorio, no del fichero.
------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------
 Delante de la cadena de permisos hay otros bits de permisos especiales (3): setuid, setguid y sticky.
 Cuando los dos primeros estan activos cuando se crean un fihcero obtiene el ususariio y grupo no del proceso sino
 del padre.
 Si estan activos aparecera como '-rws--s--t'.
-El sticky activo (con t en vez de x en o) se usa para proteger ficheros para que solo puedan ser borrados por el propieterio del fichero en
-directorios que tienen todos los permisos para todo el mundo.
------------------------------------------------------------------------------------------------------------------------
+El sticky activo (con t en vez de x en o) se usa para proteger ficheros para que solo puedan ser borrados por el propieterio
+del fichero en directorios que tienen todos los permisos para todo el mundo.
+-----------------------------------------------------------------------------------------------------------------------------
 Para cambiar de propietario un fichero se usa chown.
 {sudo chown root:root otro.txt}, se necesitan permisos de superusuario para ejecutarlo por seguridad.
 Con sudo se ejecuta el comando como root.
 Si un proceso crea un fichero obtiene es propietario del proceso que lo ejecuta.
------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------
 DIRECTORIOS:
 Arbol de directorios. Contiene una tabla de nombres de ficheros que contiene con sus inodos.
 El '.' se refiere al directorio actual. El '..' se refiere al directorio padre. Estas dos entradas siempre estan en la tabla.
 Si no estan esta en un lugar especial y magico que luego dira.
-Para sacar el inodo de '.' o '..' se usa {ls -id ..}, el 'd' es para que no interprete el '..' como directorio al que se le esta pidiendo lo que hay dentro
-sino para que diga su inodo.
+Para sacar el inodo de '.' o '..' se usa {ls -id ..}, el 'd' es para que no interprete el '..' como directorio al que se
+le esta pidiendo lo que hay dentro sino para que diga su inodo.
 {debugfs } // Muestra info del sistema de ficheros.
 La organizacion del Sistema de Ficheros varia.
 Cuando borramos un fichero se deja el fichero sin enlaces o todos menos el que acabamos de quitar.
------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------
 ENLACES:
 Se puede usar {unlink ruta/fichero} para quitarle un enlace. Si llega a 0 se elimina.
 Recuerdo de que los inodos tienen un campo 'Numero de Enlances'.
@@ -58,7 +58,7 @@ Enlace duro: mismo fichero con distintos enlaces de entrada.
 Solo se pueden hacer en el propio Sistema de Ficheros. Porque para acceder al mismo inodo tienen que estar en el mismo SF.
 Por ejemplo teniendo dos directorios como /home/usuario/ y /usr/share. Tenemos un data.txt en el primero con inodo 1496
 y lo mismo en el segundo directorio.
-Lo voy a dibujar en el cuaderno (26-9-2025 SO).
+Lo voy a dibujar en el cuaderno (SO 26-9-2025).
 Enlace simbolico: fichero que apunta a un inodo de tipo especial (enlace simbolico) y la informacion que contiene es el path
 al fichero al que apunta (que tendra otro inodo). Si la ruta no existe (si haces un enlace simbolico a un USB y lo sacas,
 la ruta queda invalida) y se denomina Enlace Roto.
@@ -67,12 +67,103 @@ enlaces. Mejor absolutas pues.
 Su tamaño es el tamaño de la ruta ("./prueba" ocupa 8).
 Los directorios tienen minimo 2 enlaces, el que apunta desde el padre y el que apunta desde si mismo (el '.'). A eso se le
 suman los directorios hijos que tenga.
------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------
 //Terminal: para crear enlaces.
 ln // Para crear enlaces. Se añade -s para enlace simbolico.
 ln prueba duro // Crea un enlace que se llama duro.
 ln -s ./prueba unenlace // Crea un enlace simbolico llamado unenlace con la ruta relativa puesta.
 // Tras esto solo habra 2 ficheros: el fichero al que apuntan prueba y duro y el fichero unenlace.
------------------------------------------------------------------------------------------------------------------------
-//Terminal:
+-----------------------------------------------------------------------------------------------------------------------------
+//Terminal: mostrar cosas y como se concatenando comandos.
 file $(ls -a) // Muestra los tipos de archivo que le da ls -a.
+-----------------------------------------------------------------------------------------------------------------------------
+//Terminal:
+dd ficheroEntrada ficheroSlida bs=x // Para copia binaria de un archivo a otro de x en x.
+dd if=/dev/urandom of=./rand bs=52 bc=4
+-----------------------------------------------------------------------------------------------------------------------------
+//Terminal: ejercicio 4 hoja 2, hacer stat.
+
+// FALTA.
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+FALTA teoria sobre permisos de ficheros.
+
+-----------------------------------------------------------------------------------------------------------------------------
+//Terminal: ejercicio 8 hoja 2.
+#include <fcntl.h>
+#include <unistd.h>
+#include <studio.h>
+#include <stdlib.h>
+
+int main(int argc, char *argv[])
+{
+	int in_fd, out_fd;
+	in_fd = open(argv[1]), O_RDONLY);
+	if(in_fd == -1)
+	{	
+		perror("Open() in");
+		return 1;
+	}
+
+	out_fd = open(argv[2]), O_WRONLY | O_CREAT | O_TRUNC, 0444);	// Permisos: que solo se pueda escribir, que se cree 
+									// si no existe y que trunque. 
+									// Tiene que empezar en 0 el octal.
+	if(out_fd == -1)
+	{	
+		perror("Open() out");		
+		return 1;
+	}
+
+	int blockSize = argv[3]; // Hay que comprobar que no sea mayor al tamaño del buffer.
+	int count = argv[4];
+
+	char buffer[8192]; 	// Como un char es un bite creamos un array de char para hacer un buffer de bites.
+				// Para direccionar bites.
+
+	int total_bytes = 0;
+
+	// Falta que se haga para el numero de bloques que se ha introducido.
+	while(total_bytes < blockSize)
+	{
+		int rc += read(in_fd, buffer + total_bytes, blockSize - total_bytes) 
+		// Desciptor desde el que leer. Buffer donde queremos escribir. Tamaño de los bites que queremos leer.
+
+		// Resultados tras leer.
+		if(rc == 0)
+		{
+			break;
+		}
+
+		total_bytes +=rc;
+	}
+
+	// Falta la escritura.
+
+	close(in_fd);
+	close(out_fd);
+}
+-----------------------------------------------------------------------------------------------------------------------------
+Para abrir un directorio usamos 'opendir(name)' que devuelve un puntero.
+Para leer las entradas 'readdir(dir)' que devuelve un struct con las entradas siendo el path desde donde se ejecuta.
+Y para cerrar 'closedir(dir)'.
+-----------------------------------------------------------------------------------------------------------------------------
+//Terminal: ejercicio de hacer el 'ls' nosotros.
+int main(int argc, char *argv[])
+{
+	DIR* dir = opendir(argv[1]);
+
+	struct* entries;
+
+	while((entries;= readdir(dir)) != NULL)
+	{
+		char path[8192]; // El numero en el enunciado no es aleatorio como este.
+		//printf("---> %s\n", dent->d_name);
+		snprintf(path, 8192, "%s/%s", argv[1], entries->d_name); // Para concatenar y que ponga la ruta completa.
+	}
+}
+// Creo que esto se puede tiene que meter en el ejercicio de stat.
+
+
+
+
