@@ -1,6 +1,12 @@
 -----------------------------------------------------------------------------------------------------------------------------
 TEMA 2: SISTEMA DE FICHEROS.
 -----------------------------------------------------------------------------------------------------------------------------
+LEYENDA:
+Bloque de terminalo codigo en C: //Terminal:.
+Codigo en C: [malloc()].
+Comandos en terminal: {ls -a}.
+Variables de terminal o de C: 'fd'.
+-----------------------------------------------------------------------------------------------------------------------------
 FICHEROS:
 Se componen de el inodo que es con sus bloques de datos.
 Para sacar el inodo con: {stat x} o {ls -i}.
@@ -74,7 +80,7 @@ ln prueba duro // Crea un enlace que se llama duro.
 ln -s ./prueba unenlace // Crea un enlace simbolico llamado unenlace con la ruta relativa puesta.
 // Tras esto solo habra 2 ficheros: el fichero al que apuntan prueba y duro y el fichero unenlace.
 -----------------------------------------------------------------------------------------------------------------------------
-//Terminal: mostrar cosas y como se concatenando comandos.
+//Terminal: mostrar cosas y como se concatenanan comandos.
 file $(ls -a) // Muestra los tipos de archivo que le da ls -a.
 -----------------------------------------------------------------------------------------------------------------------------
 //Terminal:
@@ -144,9 +150,9 @@ int main(int argc, char *argv[])
 	close(out_fd);
 }
 -----------------------------------------------------------------------------------------------------------------------------
-Para abrir un directorio usamos 'opendir(name)' que devuelve un puntero.
-Para leer las entradas 'readdir(dir)' que devuelve un struct con las entradas siendo el path desde donde se ejecuta.
-Y para cerrar 'closedir(dir)'.
+Para abrir un directorio usamos [opendir(name)] que devuelve un puntero.
+Para leer las entradas [readdir(dir)] que devuelve un struct con las entradas siendo el path desde donde se ejecuta.
+Y para cerrar [closedir(dir)].
 -----------------------------------------------------------------------------------------------------------------------------
 //Terminal: ejercicio de hacer el 'ls' nosotros.
 int main(int argc, char *argv[])
@@ -163,7 +169,54 @@ int main(int argc, char *argv[])
 	}
 }
 // Creo que esto se puede tiene que meter en el ejercicio de stat.
-
-
-
-
+-----------------------------------------------------------------------------------------------------------------------------
+SISTEMA DE FICHEROS (FS):
+Sistema para organizar ficheros y directorios en una estructura. Con una interfaz. Oparaciones para interacturar con el y
+sus elementos. Hay un punto de montaje del arbol del sistema de ficheros.
+SISTEMA DE FICHEROS VIRTUAL (VFS):
+Conjunto de estructuras de datos que tiene el nucleo del SO para soportar diferentes SFs con interfaz conmuun y abstrae
+las cosas especificas de cada uno.
+*Superbloques:
+Bloque de control que guarda la informacion del Sistema de ficheros de esa particion para organizar. Guarda el tipo de SF,
+tamaño de cada bloque, tamaño maximo de fichero, su estado, las listas de control de acceso, ...
+Sin el superbloque el SF se pierda. Hay copias de seguridad en otros bloques del disco porque es bastante importante. El
+numero de copias depende del SF.
+Con {stat -f _path_} nos da la info del SF.Con {df -T} muetra todos los SFs montados en la maquina y muestra propiedades
+parecidad al comando anterior.
+*Ficheros:
+Estructura distinta al inodo. Representa a un fichero abierto por un proceso. Cuando se abre un fichero con open
+Contiene metodos para poder escribir, ver, leer, ... El fichero tiene un enlace a una entrada del directorio, para poder
+acceder al inodo. Tiene punteros a funciones para poder hacer los metodos anteriormente dichos.
+(El inodo tiene una referencia al superbloque al que esta asociado)
+(Cuando hacemos en C [read(fd)] tras obtener el 'fd' de un [open], ese 'fd' vale 3 lo que apunta a un tipo FILE)
+*Gestion de bloques:
+-Asignacion de bloques: le vamos a intentar pedir que mantenga estas cosas.
+--Localidad Espacial: quermemos los datos de un fichero juntos para tener un buen rendimineto. Para discos mecanimos para
+evitar mover la cabeza de mas. En los SSD para tener que calcular menos operaciones.
+--Fragmentacion:
+---Externa aunque vayas asignando la memoria bien los movimientos, asignaciones o desasignaciones de memoria hacen
+que se creen huecos entre medias. Se pueden hacer programas para ir reordenando los huecos. (Le pediremos baja fragmentacion
+externa).
+---Interna: el espacio que no se utiliza tras asignar espacio menor al tamaño de bloque. (Dificil de solucionar).
+---Mitigar la fragmentacion. Algunos SFs aplican todas o parte.
+----Extends: en vez de dar bloques individuales, se da un grupo de bloques dando un bloque inicial y un numero de bloques
+tras el. Te aseguras que todos los bloques de un exteds esten seguidos. Pero pedir 2 extends no te asegura que los 2 esten
+seguidos. En ext4 no puede haber extends de mas de 128MB como dato.
+----Asignacion retardada: los bloques se asignan cuando los datos se escriben en disco, asi calculas bien donde y cuanto
+ocupa en bloques.
+----Preasignacion de bloque: cuando pides memoria se preasignan bloques. Cuando se cierra el archivo se liberan los no
+usados. Con [fallocate(x)] se piden x bloques contiguos.
+----Agrupacion de bloques.
+-Estructura SF ext4:
+|Superbloque|Descriptores de grupo|Mapa de bloques|Mapa de inodos|tabla de inodos|Bloques de datos|
+-Estrategias de asignacion:
+--Asignacion contigua: se van asignando bloques contiguos. Se suele usar solo para medios de solo lectura.
+--FATx: 2^x bloques. Los bloques se almacenan como una lista enlacada. Quien dice lista dice tabla. En la tabla estan todos los numeros de
+bloque y el estado del bloque que puede tener BAD (algo esta mal), FREE (bloque libre) y el numero del bloque siguiente en
+la lista (EOF si es fin de archivo). Para sistemas pequeños como USBs puede venir bien. Te libras de la fragmentacion
+externa.
+--Bloques indexados: el inodo guarda punteros directos a bloque=Indices directos.
+Tambien hay punteros indirectos que llevan a bloques con punteros a bloques. Hay hasta triples indirecciones.
+Se reduce la fragmentacion externa. Si los ficheros son pequeños el acceso es muy eficiente. Cuanto mas grande el fichero mas
+cuesta acceder o borrar. Ejemplos: ext2 y UFS (Unix File System).
+Tamaño maximo en cuaderno 9-10-2025 SO.
