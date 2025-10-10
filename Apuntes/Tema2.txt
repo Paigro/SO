@@ -220,3 +220,36 @@ Tambien hay punteros indirectos que llevan a bloques con punteros a bloques. Hay
 Se reduce la fragmentacion externa. Si los ficheros son pequeños el acceso es muy eficiente. Cuanto mas grande el fichero mas
 cuesta acceder o borrar. Ejemplos: ext2 y UFS (Unix File System).
 Tamaño maximo en cuaderno 9-10-2025 SO.
+-----------------------------------------------------------------------------------------------------------------------------
+Arboles balnceados. Datos solo en hojas. Raices+intermedias calves ("bloques"). Tamaño reducido (5-4 niveles).
+-----------------------------------------------------------------------------------------------------------------------------
+Ficheros dispersos (sparse):
+Ficheros parcialmente vacios con regiones sin datos. EL SF no los lee.
+-----------------------------------------------------------------------------------------------------------------------------
+Ejercicio 10 hoja 2: Tt= 64MB y Tb= 1KB.
+Hay una tabla con una entrada para cada bloque. Esta tendra = Tt/Tb entradas = 2^16 = 64K bloques/entradas.
+Laa longitud de cada entrada sera log2 de 2^16 = 16 bits.
+Suponemos que el bloue 0 no esta libre o disponible pr dicheros, porque contendra la tabla FAT.
+El tamaño total de la tbla seria 16b (2B) de cada entrada * 64K entradas que hay = 128K bytes
+-----------------------------------------------------------------------------------------------------------------------------
+Ejercicio 11 hoja 2: resuelto en el PDF.
+-----------------------------------------------------------------------------------------------------------------------------
+//Terminal: Ejercicio 13 hoja 2: 
+truncate --size 100M fs.ext2 // Reservar memoria para el inodo.
+mkfs.ext2 fs.ext2 // para crear un sistema de ficheros que usa bloques indexados.
+mkdir mnt // Creamos un directorio pater el SF.
+sudo  mount -t ext2 -o loop ./fs.ext2 ./mnt/ 	// Para montar o desmontar se necesitan permisos de superusuario. Loop para
+						// decirle que el SF esta dentro de otro SF.
+echo 123456789 > small.txt // Creamos un archivo pequeñito.
+dd if=/dev/random of=/big bs=024 count=520 // Un archivo grande. Del tamaño del bloque.
+dd if=/dev/random of=/sparse bs=024 count=1 seek=51192 // Un archivo sparse.
+// Para ver cosas del FS. No es el mismo stat que hemos usado hasta ahora. X es el numero de inodo que queramos ver. Y
+// ponerle el FS que queremos ver.
+debugfs -R "stat"<x> ../fs.ext2
+
+// Para ir al bloque 1025 con dd. Pero como no sabemos cuento ocupa la tabla de inodos y demas cosas intermedias no nos
+// da lo que queremos ver que deberia ser 123456789.
+dd if=./fs.ext2 of=./salida bs=1024 count=1 seek=1025
+-----------------------------------------------------------------------------------------------------------------------------
+Ejercicio 1 6hoja 2: resuelto en el cuadernos 10-10-2025 SO.
+-----------------------------------------------------------------------------------------------------------------------------
