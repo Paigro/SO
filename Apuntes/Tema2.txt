@@ -36,7 +36,7 @@ Los permisos de ejcucion para directorios permiten o no hacer cd al directorio.
 Borrar un fichero de un directorio depende de los permisos del directorio, no del fichero.
 -----------------------------------------------------------------------------------------------------------------------------
 Delante de la cadena de permisos hay otros bits de permisos especiales (3): setuid, setguid y sticky.
-Cuando los dos primeros estan activos cuando se crean un fihcero obtiene el ususariio y grupo no del proceso sino
+Cuando los dos primeros estan activos cuando se crean un fihcero obtiene el ususario y grupo no del proceso sino
 del padre.
 Si estan activos aparecera como '-rws--s--t'.
 El sticky activo (con t en vez de x en o) se usa para proteger ficheros para que solo puedan ser borrados por el propieterio
@@ -46,6 +46,7 @@ Para cambiar de propietario un fichero se usa chown.
 {sudo chown root:root otro.txt}, se necesitan permisos de superusuario para ejecutarlo por seguridad.
 Con sudo se ejecuta el comando como root.
 Si un proceso crea un fichero obtiene es propietario del proceso que lo ejecuta.
+{sudo chmod +s archivo.txt}
 -----------------------------------------------------------------------------------------------------------------------------
 DIRECTORIOS:
 Arbol de directorios. Contiene una tabla de nombres de ficheros que contiene con sus inodos.
@@ -251,5 +252,5 @@ debugfs -R "stat"<x> ../fs.ext2
 // da lo que queremos ver que deberia ser 123456789.
 dd if=./fs.ext2 of=./salida bs=1024 count=1 seek=1025
 -----------------------------------------------------------------------------------------------------------------------------
-Ejercicio 1 6hoja 2: resuelto en el cuadernos 10-10-2025 SO.
+Ejercicio 16 hoja 2: resuelto en el cuadernos 10-10-2025 SO.
 -----------------------------------------------------------------------------------------------------------------------------

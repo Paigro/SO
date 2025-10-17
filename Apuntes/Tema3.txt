@@ -1,0 +1,14 @@
+-----------------------------------------------------------------------------------------------------------------------------
+TEMA 3: PROCESOS.
+-----------------------------------------------------------------------------------------------------------------------------
+LEYENDA:
+Bloque de terminalo codigo en C: //Terminal:.
+Codigo en C: [malloc()].
+Comandos en terminal: {ls -a}.
+Variables de terminal o de C: 'fd'.
+-----------------------------------------------------------------------------------------------------------------------------
+Todos los procesos tienen un identificador unico (PID) con [get pid()] y un padre (PPID) con [getppid()].
+Con {ps} obtenemos informacion del porceso. Con {-a} se ven todos y con {-aH} los identa por parentesco. Con {aHl} se 
+muestra tambien el PPID. UID es el id del propietario del proceso.
+Cuando se ejecutan comando en consolas, todos los porcesos que se crean tienen como padre la propia consola. Con el 
+propietario usuario efectivo podemos saber los permisos y como se implementan en la practica.
