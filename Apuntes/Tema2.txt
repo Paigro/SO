@@ -2,7 +2,7 @@
 TEMA 2: SISTEMA DE FICHEROS.
 -----------------------------------------------------------------------------------------------------------------------------
 LEYENDA:
-Bloque de terminalo codigo en C: //Terminal:.
+Bloque de terminal o codigo en C: //Terminal:.
 Codigo en C: [malloc()].
 Comandos en terminal: {ls -a}.
 Variables de terminal o de C: 'fd'.
