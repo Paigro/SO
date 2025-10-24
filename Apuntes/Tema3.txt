@@ -124,6 +124,115 @@ En una misma shell pueden haber varias sesiones. Con {jobs} se ven, con {fg} y {
 tambien con & al ejecutar un comando lo manda al background directamente. Si no se especifica nada al hacer {fg} o {bg} este
 actua sobre el proceso que tenga el '+' (se ve al llamar a {jobs}). Tambien hay un '-' que es que cuando desaparezca el que
 tiene el '+' es el que se pone el '+'.
+-----------------------------------------------------------------------------------------------------------------------------
+//Ejercicio 11 y 12 hoja 3: la repsuesta al 12 es no. Si se usa el mismo descriptor de escritura se escribiria  en desorden
+//creo.
+#define NUM 5
+
+void imprimir_indice(int fd, int indice){
+    char buffer[NuM];
+    for(int i=0; i<NUM; i++){
+        buffer[i] = '0' + indice; // Desplazamiento del puntero
+    }
+
+    write(fd, buffer, NUMsizeof(char));
+
+    /
+    char buffer[NUM+1];
+
+
+    /
+}
+
+int main(int argc, charargv[]) {
+    pid_t pid;
+    int rc;
+
+    int fd = open("archivo.txt", 
+        O_WRONLY | O_CREATE | O_TRUNC, 
+        0660);
+
+    imprimir_indice(fd, 0); // Padre
+
+    close(fd);
+
+    for(int indice = 1; indice <= 6; indice++){
+        pid_t pid = fork();
+
+        // Solo el padre crea nuevos procesos
+        if (pid != 0) {
+            continue;
+        }
+        // El padre no entra aqui
+        // cada hijo tiene su archivo
+        fd = open("archivo.txt", O_WRONLY);
+        // Como hijo, nos posicionamos en el lugar correcto
+        lseek(fd, indice * NUM, SEEK_SET);
+        srandom(indice);
+        sleep(random() % 3);
+        imprimir_indice(fd, indice);
+
+        close(fd);
+        return 0;
+    }
+
+    // Esperamos a los hijos
+    for(int i=0; i<=5; i++){
+        int s;
+        waitpid(0, &s, 0);
+        // Obtener el PID del hijo que ha terminado
+        if (WIFEXITED(s)) {
+            printf("Hijo [%i]finalizado con codigo %d\n", rc, WEXITSTATUS(s));
+        }
+    }
+    return 0;
+}
+-----------------------------------------------------------------------------------------------------------------------------
+MULTIPROGRAMACION: uso de un proceso de la CPU mientras otro no la esta usando (por ejemplo esta con E-S). Mejora la
+eficiencia.
+Hay que ver a que proceso se le asigna la CPU (con Algoritmos de Planificacion)(1), como cambiar de un proceso a otro (cambio
+de contexto)(2) y cuando evaluamos el estado del sistema (Tick de reloj)(3).
+Niveles de planificacion: tres tipos.
+-Largo plazo: control de admision de trabajos.
+-Medio plazo: mueve los procesos de memoria principal a secundaria.
+-Corto plazo: decide los procesos que estan disponibles para ejecutarse a continuacion en la CPU.
+El unico planificador en los SO generales son de corto plazo. Los de largo plazo se implementan con aplicaciones especificas
+externas que actuan sobre el SO. Los de medio plazo reemplazados por los mecanismos de paginacion. Aunque en algunos casos
+el SO de Android usa este metodo para suspender aplicaciones a segundo plano.
+(3)ACTIVACION DEL PLANIFICADOR (ticks):
+Para determinar cuando se ejecuta el Planificador. Cada x tiempo se manda. No esta bien del todo porque hay veces que no es
+necesarioejecutar el Planificador porque no hay nada que hacer (si esto estuviese en moviles la bateria duraria 2/3 veces
+menos). Entonces hay un modo que es tickless. Se programan las interrupciones a demanda. Es mejor para moviles. Esto hace
+que la CPU puede ponerse en modo Idle, pero es costoso la entrada-salida a ese modo.
+Linux usa una combinacion de ambas, tickless cuando solo hay una tarea (asi evita interrumpir periodicamente para llamar al
+planificador. Siempre hay un core que no entra en modo Idle por obvias razones que si todos estan idles pues alomejor no se
+despierta ninguno.
+Hay eventos para la activacion de planificacion. Hay para cuando hay un cambio de estado en un proceso, cuando se crea o
+destruye un proceso o por cesion voluntaria (el proceso cambia su prioridad (con nice()) o cede a la CPU)
+(2)CAMBIOS DE CONTEXTO:
+Para cambiar de un proceso a otro hay que reajustar el contexto: cambiar la Memoria Virtual (actualizacion de los registros
+al nuevo contexto) y cambio de contexto de ejecucion de la CPU (hay que guardar los registros generales, contador de
+programa, pila, registros especificos; actualizar el puntero de pila a la nueva tarea, cargar los registros del nuevo
+proceso y continuar con la ejecucion del nuevo proceso).
+Este proceso es costoso. Pero el cambio de contexto entre threads es menor (Memoria Virtual) pero no despreciable.
+
+(1)OBJETIVOS DE PLANIFICACION:
+El planificador esun algortimo que asigna recursos a los procesos tratando de optimizar un objetivo.
+Hay varios objetivos:
+-Utilizacion: maximizar el uso de la CPU.
+-Productividad: maximizar el numero de procesos terminados por unidad de tiempo.
+-Tiempo de respuesta: minimar el tiempo que empieza el proceso hasta la primera respuesta.
+-Turnaround: minimizar el tiempo desde que entra un proceso hasta que termina. Desde fork() hasta exit().
+-Tiempo de espera: minimizar el tiempo total en la cola de espera. TE = Turnaround - Tiempo CPU - Tiempo E-S.
+-Fairness (justicia): reparto equitativo de los recusoso modulado por prioridad y caracteristicas de cada proceso. Si a un
+proceso no le das CPU se llama inanicion, se queda sin comer ñam ñam no y eso mal.
+Modelos de planificacion:
+-Expropiativo: el proceso usa la CPU hasta que un planificador decide reemplazarlo por otro. Cooperacion.
+-No expropiativo: el proceso usa la CPU hasta que termina, entra en espera de evento o la cede voluntariamente. Egoista.
+-----------------------------------------------------------------------------------------------------------------------------
+Al hacer {ps -e} los procesos que pogan "k%" son los procesos del kernel. % = como en BD.
+-----------------------------------------------------------------------------------------------------------------------------
+
 
 
 
