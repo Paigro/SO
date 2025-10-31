@@ -10,11 +10,11 @@ Variables de terminal o de C: 'fd'.
 Todos los procesos tienen un identificador unico (PID) con [get pid()] y un padre (PPID) con [getppid()].
 Con {ps} obtenemos informacion del porceso. Con {-a} se ven todos y con {-aH} los identa por parentesco. Con {aHl} se 
 muestra tambien el PPID. UID es el id del propietario del proceso.
-Cuando se ejecutan comando en consolas, todos los porcesos que se crean tienen como padre la propia consola. Con el 
+Cuando se ejecutan comandos en consolas, todos los porcesos que se crean tienen como padre la propia consola. Con el 
 propietario usuario efectivo podemos saber los permisos y como se implementan en la practica.
 -----------------------------------------------------------------------------------------------------------------------------
 Crear procesos: [pid = pid_t fork(void)], crea un proceso clon al que lo crea. Devuelve 0 si es el hijo, el PID del hijo si
-es el padre y´-1 si da error. Se clona toda la estructura (memoria virtual (hace un copy on write, no copia todo si no es
+es el padre y -1 si da error. Se clona toda la estructura (memoria virtual (hace un copy on write, no copia todo si no es
 necesario, solo cuando se modifica), contexto de ejecucion, tabla de descriptores (se copia el puntero no la estructura como 
 tal. Poner 'close_on_exec' para que no se mantenga abierto despues de acabar los forks) y manejadores de señales) y solo
 cambian los identificadores y algunas cosas mas.
@@ -199,6 +199,7 @@ Niveles de planificacion: tres tipos.
 El unico planificador en los SO generales son de corto plazo. Los de largo plazo se implementan con aplicaciones especificas
 externas que actuan sobre el SO. Los de medio plazo reemplazados por los mecanismos de paginacion. Aunque en algunos casos
 el SO de Android usa este metodo para suspender aplicaciones a segundo plano.
+
 (3)ACTIVACION DEL PLANIFICADOR (ticks):
 Para determinar cuando se ejecuta el Planificador. Cada x tiempo se manda. No esta bien del todo porque hay veces que no es
 necesarioejecutar el Planificador porque no hay nada que hacer (si esto estuviese en moviles la bateria duraria 2/3 veces
@@ -209,6 +210,7 @@ planificador. Siempre hay un core que no entra en modo Idle por obvias razones q
 despierta ninguno.
 Hay eventos para la activacion de planificacion. Hay para cuando hay un cambio de estado en un proceso, cuando se crea o
 destruye un proceso o por cesion voluntaria (el proceso cambia su prioridad (con nice()) o cede a la CPU)
+
 (2)CAMBIOS DE CONTEXTO:
 Para cambiar de un proceso a otro hay que reajustar el contexto: cambiar la Memoria Virtual (actualizacion de los registros
 al nuevo contexto) y cambio de contexto de ejecucion de la CPU (hay que guardar los registros generales, contador de
@@ -230,8 +232,63 @@ Modelos de planificacion:
 -Expropiativo: el proceso usa la CPU hasta que un planificador decide reemplazarlo por otro. Cooperacion.
 -No expropiativo: el proceso usa la CPU hasta que termina, entra en espera de evento o la cede voluntariamente. Egoista.
 -----------------------------------------------------------------------------------------------------------------------------
-Al hacer {ps -e} los procesos que pogan "k%" son los procesos del kernel. % = como en BD.
+Al hacer {ps -e} los procesos que pogan "k%" son los procesos del kernel. He usado el '%' como en BD.
 -----------------------------------------------------------------------------------------------------------------------------
+Algoritmos de planificacion:
+FIRST COME FIRST SERVE (FCFS):
+Se van haciendo segun el orden de llegada.
+SHORTEST JOB FIRST (SFJ):
+Se planifican primero los procesos mas cortos.Probelma de inanicion para las largas.
+ROUND ROBIN (RR):
+Combina FCFS con periodos fijos de tiempo (cuanto). SE ejecutan los procesos durante ese tiempo fijado.
+SHORTEST REMAINING TIME FIRST (SRTF):
+Combina SJF con RR con un cuanto.
+COLAS MULTINIVEL:
+Se clasifican en colas de preparados con prioridades distintas. Se ejecutan de mayor a menor prioridad. Los porcesos con
+prioridad se usa RR. Sigue habiendo inanicion. Para ello, para que las que tienen menos prioridad puedan tener oportunidad
+cada x tiempo se hace un priority boost a todas las de baja prioridad. Se pueden abusar las reglas de  planificacion. Para
+ello se va acumulando cuanto cuanto has usado para evitar el trampeo.
+-----------------------------------------------------------------------------------------------------------------------------
+Ejercicio 16 hoja 3:
+Que me pase Andres las 2 tablas que ha hecho pero no es complicado el ejercicio.
+-----------------------------------------------------------------------------------------------------------------------------
+Ejercicio 17 hoja 3:
+Cuaderno 31-10-2025 SO.
+-----------------------------------------------------------------------------------------------------------------------------
+Linux intenta priorizar las tareas interactivas. Linux tiene 100 colas, 1 con lo dicho y 99 no exporpiativasa con FIFO o con
+RR.
+El administrador puede afectar a la prioridad de un procesos con el valor nice. Cuanto mas nice un procesos menos prioritario
+es porque es mas majo y deja mas la prioridad. Nice va de [-20, 19]. Como usuario empiezas en o de nice y puede ir hasta 19, 
+para ser menos nic es necesario ser administrador.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
