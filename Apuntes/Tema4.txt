@@ -1,0 +1,125 @@
+-----------------------------------------------------------------------------------------------------------------------------
+TEMA 4: Memoria
+-----------------------------------------------------------------------------------------------------------------------------
+Examen el 8 de Enero.
+-----------------------------------------------------------------------------------------------------------------------------
+Memoria Virtual: abstraccion que proporciona a los procesos una memoria grande, lineal y privada. Para facilitar la vida a
+los programadores. Para dar un espacio de direcciones mas mayor. Permite compartir memoria con otros procesos tambien. El
+SO gestiona el intercambio de informacion entre MP fisica y la secundaria en dsico(swap) (area de intercambio en Windows).
+Los objetivos son:
+Sobresuscripcion: mayor memoria aparente. Para ejecutar procesos que usan mas memoria de la disponible.
+Multiprogramacion: ejecucion aislada de procesos (y el kernel). Cada proceso memoria aislada. Pero tabien se puede compartir.
+Como las librerias compartidas.
+Reubicacion: simplifica el desarrollo software permitiendo que los programas se puedan cargar en cualquier posicion. En EC
+cada variable tenia su direccion y habria que ir recompilando con cada cambio, com MV se encarga el SO de eso.
+-----------------------------------------------------------------------------------------------------------------------------
+Memoria Virtual paginada: modelo mas usado frente a la segmentacion. Se divide la MV en paginas de tamaño determinado (4ks
+en Linux). Cada pagina cargada tiene su region espejo (marco de pagina) en MP o en disco o asignacion tardia (no reserva
+hasta que se lo piden). Hay varios niveles de indireccion de traducciones como habai con el SF.
+La Tabla de Paginas contiene:
+(1) Marco de Pagina donde esta la pagina.
+(2) Presencia, si esta en MP o no para ir o no a buscarla.
+(3) Modificacion, para ver si hay que actualizarla o notificar a otros procesos sobre estas modificaciones.
+(4) Proteccion, si es de escritura o de lectura-escritura, o ejecutable (NX significa que no es ejecutable esa pagina).
+(5) Acceso, para las politicas de reemplazamiento.
+(6) Usuario, nivel de privilegio para ver quien puede acceder a esa pagina (usuario-supervisor).
+(7) Cache, si se puede llevar o no, si se activa el modo write-thought para que escriba directamente en MP.
+La MMU es la unidad de gestion de Memoria. Coge el registro CR3, hace las indirecciones para sacar las direcciones para
+acceder a las direcciones de MP o lanzar errorres si ocurren. Para acelerar las traducciones mas usadas o recientemente
+usadas se creo la TLB (televe) (cache de traducciones). Una por CPU, junto a la Cache de Nivel 1.
+Entonces lo importante, que hace el SO; se encarga de mantenera las tablas de paginas actualizadas, gestionar las excepciones
+asgingando nuevas paginas de memorias (bajo demanda porque son lazys), traer paginas de la memoria secundaria, terminar el
+proceso (SIGSEV) o accesos no validos (permisos) a memoria, configurar el MMU para que funione correctamente por ejemplo
+cuando se cambia de contexto en un procesos refrescando la TLB y actualizando el MMU y configurar los accesos compartidos a
+paginas de memoria. Puede hacer que las traducciones de distintos procesos apunten a la misma pagina como cuando se carga una
+lirbreria dinamica que se pone en un pagina compartida. Si una pagina no es compartida es privada.
+-----------------------------------------------------------------------------------------------------------------------------
+Tamaños de pagina: importante. Porque si son muy grandes puede haber fragmentacion interna = las paginas se quedan con
+espacio sin usar. Al disminuir el tamaño puede fastiadiar a las traducciones llenando la TLB haciendola menos eficiente al
+tener que cargar o echar paginas. Importante el tamaño tambien para la transferencia a Memoria Secundaria, mas gradne mas
+tarda y viceversa.
+En Linux: el tamaño por defecto es de 4kB {getconf PAGE_SIZE}, comando que devuelve el tamaño de pagina. Linux tiene un
+metodo Huge Pages:
+-Transparent Huge Pages: puede combinar paginas de 4kB en paginas de 2mB (que son 512 paginas) si estan continuas. Se puede
+configurar con {madvise(2)} para decirle lo que vas a hacer con la memoria del proceso. Contiguas en direcciones fisicas.
+-Huge Pages: se puede reservar al arrancar el Sistema una pool de paginas de 2mB o 1gB que las aplicacines pueden solicitar. 
+Para bases de datos son interesantes o cuando iniciamos la Maquina Virtual.
+-----------------------------------------------------------------------------------------------------------------------------
+Mapa de memoria de un proceso. Dividido en segmentos. Las importantes: .text (intrucciones), .rodata (cosntantes), .data (variables globales static inicializadas), .bss (variables globales static NO inicializadas):
+//int numero = 21; // .data
+//int resultado; // .bss
+//const char *msg = "Hola\n"; // .rodata
+//static in factor = 2; // (dentro de main) .data
+//while(...){ if(...) } // .text
+Segmentos de memoria: son areas de memoria contigua con varias paginas de MV (la estructura en Linux es vm_area_struct, que tiene tipo y permisos). Tipos: respaldadas por fichero (si no tiene son anonimas (no respaldadas por un fichero), heap, stack, memoria dinamica), privadas accesibles por solo el proceso o compartidas y accesibles por otros procesos. El heap crece hacia direcciones altas (del 0 al F) y la pila crece hacia direcciones bajas (del F al 0). En el mapa de memoria del procesos esta mapeado el kernel abajo del todo (abajo hacia arriba, las FFs), no es accesible por el usuario. Esta mappeado en todos los procesos para facilitar la llamada a las funciones del sistema. Despues de que algo pasase, las tablas de paginas de traducciones se separan para dar mas porteccion a los programas que de repente podian ver la TLB, entonces ahora mas seguro tras ese parche pero provoca mas fallos de TLB, cosa pocha pero segura. Esto se puede desactivar.
+Si un segmento esta respaldado por un fichero, tiene un puntero que contiene el inodo, dentry y address_space. Ademas los segmentos tienen unas flags, unas operaciones (open(), close(),...)
+Hay una tabla en las trasnparencias con como suelen ser los segmentos tipicos (.text es File, RX, SHARED y de tamaño fijo). No voy a copiar todos ni a hacer una tabla en Bloc de Notas.
+-----------------------------------------------------------------------------------------------------------------------------
+//Ejercicio 1 Hoja 4.
+// Nos da un codigo y hay preguntas.
+#include <stdio.h>
+#include <unistd.h>
+int num = 22; // Va a .data
+int mul; // Va a .bss
+ç
+
+const char *msg = "El resultado es:\n"; // Va a .rodata
+
+
+int main(void) 
+{
+    static int factor = 2; // Va a .data
+
+
+    mul = num * factor; // Va a .text
+    printf("%s%i\n", msg, mul); // Va a .text y a .rodata el formato
+
+
+    sleep(600); // Va a .text. Lo pone a sleep para que podamos ver cosas de este proceso, 10 min para us. Y se le ha acabado
+
+
+    return 0; // Va a .text
+}
+// Con {readelf programa} se lee un .elf y con -l se ven los segmentos.
+// Te dice donde esta cada segmento con su offset en hexadecimal, el tamaño, los permisos (por ejemplo .txt es de solo // lectura y ejecutable; .rodata es de solo lectura y no ejecutable). Hay una tabla para rellenar con los datos sacados de // este comando.
+// Podemos ver las cosas que hemos visto de la memoria de un procesos podemos ir al directorio del proceso. Viendo maps para // ver las listas de paginas y map_files. Tambien esta pagemap para ver las traducciones para ver en que marco de MF esta // pero esta en binario y yo no se tu pero no se leer binario.
+// En map_files por columnas: direccion virtual-permisos-offset(desplazamiento desde el principio, raras por seguridad)-// // dispositivo(manor-minor?)(por si hubiese que recuperar cosas)-inodo-path(que lo respalda). Si no hay path son anonimas, // // solo estan en memoria, si se pierden se pierden. Se ven las librerias compartidas tambien, eh heap y el stack y se ve que
+// el stack crece hacia arriba porque la diferencia de direcciones es grande y lo mismo con el heap.
+// En maps, regiones de memoria. Mirando desde maps y metiendonos en este directorio y usando... Se le ha acabado el tiempo, // como no hemso recompilado el programa el offset no ha cambiado pero las paginas virtuales son distintas... {sudo strings // (de la ruta donde sabemos que esta por ejemplo .rodata)} podemos ver "El resultado es:\n" y "%s%i\n" entre otras cosas que // tiene .rodata. Si pones al {strings} el .elf pues te muestra todo y entre todo el batiburrillo y en la posicion a partir
+// del offset pues efectivamente te vuelves a encontrar las cosas de .rodata.
+-----------------------------------------------------------------------------------------------------------------------------
+El comando {ps} muestra la memoria consumida por un proceso...y no me ha dado tiempo a copair mas de esta diapositiva Con {top} en VIRT se ve la memoria virtual y con RES es la memoria reservada que es lo improtante porque en VIRT alomejor aparece un 32gB.
+-----------------------------------------------------------------------------------------------------------------------------
+Al hacer un [fork()] se copian las paginas de memoria vitual pero inteligentemente con copy-on-write, no se copian a menos que se hayan modificado.
+Al hacer execve carga un nuevo ejecutable reemplazando el espacio de direcciones.
+Al llamar a br reservas heap???
+Y existe mmap que vemos mañana.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
