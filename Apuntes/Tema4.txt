@@ -61,7 +61,6 @@ Hay una tabla en las trasnparencias con como suelen ser los segmentos tipicos (.
 #include <unistd.h>
 int num = 22; // Va a .data
 int mul; // Va a .bss
-ç
 
 const char *msg = "El resultado es:\n"; // Va a .rodata
 
@@ -92,16 +91,165 @@ El comando {ps} muestra la memoria consumida por un proceso...y no me ha dado ti
 -----------------------------------------------------------------------------------------------------------------------------
 Al hacer un [fork()] se copian las paginas de memoria vitual pero inteligentemente con copy-on-write, no se copian a menos que se hayan modificado.
 Al hacer execve carga un nuevo ejecutable reemplazando el espacio de direcciones.
-Al llamar a br reservas heap???
-Y existe mmap que vemos mañana.
+Al llamar a brK, mueve la localizacion del program break (¿puntero? al final del bloque de datos) lo que aumenta o disminuye el heap.
+Al usar mmap que se crea, destruye, redimensiona segementos de diferentes tipos.
+-----------------------------------------------------------------------------------------------------------------------------
+MMAP: se le puede pasar un origen pero nosotros lo pondremos a NULL para que el SO busque el hueco libre por el que podamos empezar. Flags: para los permisos de esa zona de memoria. Flags para el tipo de fichero o anonimo. Le podemos pedir paginas mas grandes de las estandar.
+MUNMAP: para liberar memoria. No se asegura la sincronizacion de la memoria. Para ello hay que sincronizarla primero con [msync(void, size_t, int)].
+-----------------------------------------------------------------------------------------------------------------------------
+//Ejercicio 7 hoja 4.
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 
+int main(int argc, char *argv[])
+{
+    int factor    = atoi(argv[1]);
+    int elementos = factor * 1024;
+    printf("Inicializando región de memoria\n");
+    int * ptr = (int *) malloc(elementos * sizeof(int));
+    for (size_t i = 0; i < elementos; i++){
+        ptr[i] = 1;
+    }
+    sleep(600);
+    return 0;
+}
+// Al trazar las llamadas al con {strace} al llamar al programa, el malloc no hace nada porque es muy poca memoria la que se
+// esta pidiendo.El puntero que esta devoviendo no esta al principio del heap porque seguramente la libc tenga algo cargado
+// ahi. Puede pedir el numero de direcciones que se reservan para la pila al principio. Restar y ya y dividir entre lo que
+// ocupe cada direccion. Malloc con poca memoria te lo coge del heap, si pides mas llama a mmap para mappear memoria para
+// darte y devuelve el puntero a esa zona para luego poder liberarla. Malloc siempre deja algo de espacio antes de donde te
+// da la memoria y te devuelve el puntero a partir de ahi.
+-----------------------------------------------------------------------------------------------------------------------------
+//Ejercicio 3 hoja 4.
+// Escribe un programa que cree una región de memoria (mmap(2)) con las siguientes características: 
+#inlude <sys/mman.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main(int argc, char *argv[])
+{
+	void * ptr = mmap (NULL, // Origen.
+			1024, // Tamaño.
+			PROT_READ | PROT_WRITE, // Permisos de lectura y escritura.
+			MAP_PRIVATE | MAP_ANOM, // Flags de que es memoria privada y anonima.
+			-1, // Archivo.
+			0) // Offset.
+
+	// Comprobacion de que se ha mappeado bien la memoria.
+	if(ptr == MAP_FAILED) // Importante comparar con la cte y no con -1 que es lo que devuelve.
+	{
+		perror("mmap()");
+		return 1;
+	}
+
+	memset(ptr, 0, 1024);
+	printfI("PID: %i, VMA: %p\n", getpid(), ptr());
+
+	sleep(6000);
+
+	return 0;
+}
+// Aunque le pidas un 1kB te da lo minimo de 4kB porque es el tamaño de una pagina.
+-----------------------------------------------------------------------------------------------------------------------------
+//Ejercicio 4 hoja 4.
+//Re-escribir el ejercicio 11 de la Hoja 3 proyectando el fichero de salida (output.txt) en la memoria virtual:
+#inlude <sys/mman.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/wait.h>
 
 
+// Recibe la region de memoria y el proceso.
+void write_char(void * _ptr, int proc)
+{
+	char * ptr = (char*) _ptr;
+	for(int i = 0; i < 5, ++i)
+	{
+		ptr[proc * 5] + i = '0' + proc; // Esto te da el caracter ASCII. "Truquito".
+	}
+}
+
+int main(int argc, char *argv[])
+{
+	// Preparacion del segmento de memoria. Para ello:
+	// (1) Mapa compartido.
+	// (2) Abrir fichero para poder mappearlo.
+	// (3) Tamaño del fichero adecuado. 5 procesos * 5 escrituras = 25, demosle 30 porque si. (+5 porque el padre 	// escribe tambien).
+	// (4) Llamar a mmap del fichero.
 
 
+	// (1)(2)
+	int fd = open("salida.txt",
+			O_RDWR | O_TRUNC | O_CREAT, // Flags de permisos, trucar a 0 el tamaño y creacion si no existe.
+			0660); // Permisos de lectura y escritura para el usuario y grupo.
+	// Habria que comprobar que se ha creado bien.
 
+	// (3)
+	ftruncate(fd, 30);
+	// Tambien habria que comprobar que se ha hecho bien.
 
+	// (4)
+	void * ptr = mmap (NULL, // Origen.
+			30, // Tamaño. Podria no ponerse el mismo tamaño del fichero.
+			PROT_READ | PROT_WRITE, // Permisos de lectura y escritura.
+			MAP_SHARED, // Flags de que es memoria compartida.
+			-fd, // Archivo.
+			0) // Offset.	
+
+	// Comprobacion de que se ha mappeado bien la memoria.
+	if(ptr == MAP_FAILED) // Importante comparar con la cte y no con -1 que es lo que devuelve.
+	{
+		perror("mmap()");
+		return 1;
+	}
+
+	// Todo esto se tiene que hacer antes que los forks porque la memoria es compartida y hay que usar el ptr comun.
+
+	write_char(ptr, 0); // Llamada del padre que escribe. Se podria hacer con memset en vez de con otro metodo a parte.
+
+	// Creacion de hijos.
+	for(int i = 1; i < 6; ++i) // Empezar en 1 para pasarle el id 1 al hijo 1.
+	{
+		pid_t pid = fork(); // Todo se copia y se crea con copy_on_write.
+
+		if(pid != 0) // Es el padre.
+		{
+			continue; // El padre no tiene que hacer nada mas que crear hijos.	
+		}
+		
+		write_char(ptr, i);
+		exit(0); // Los hijos no tienen que hacer nada mas que escribir asi que salir con exit.
+	}
+
+	// Esperar a los 5 hijos.
+	for(int i = 0; i < 5; ++i)
+	{
+		int status;
+		pid_t pid;
+		pid = wait(&status);
+
+		print("HIJO: %\n", status);
+	}
+
+	// Sincronizacion:
+	msync(ptr, 30, MS_SYNC);
+
+	// Liberar memoria.
+	munmap(ptr, 30);
+
+	return 0;
+}
+// Cuando el proceso termina tecnicamente se libera todo pero mejor lo hacemos nosotros por saneamiento.
+// Respecto a llamadas al sistema este codigo hace menos (exit). Respecto a escritura en disco respecto a write, es igual.
+// Respecto a rendimiento, esto es mejor.
+-----------------------------------------------------------------------------------------------------------------------------
+CACHE DE PAGINAS:
 
 
 
