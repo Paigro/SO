@@ -45,7 +45,7 @@ configurar con {madvise(2)} para decirle lo que vas a hacer con la memoria del p
 -Huge Pages: se puede reservar al arrancar el Sistema una pool de paginas de 2mB o 1gB que las aplicacines pueden solicitar. 
 Para bases de datos son interesantes o cuando iniciamos la Maquina Virtual.
 -----------------------------------------------------------------------------------------------------------------------------
-Mapa de memoria de un proceso. Dividido en segmentos. Las importantes: .text (intrucciones), .rodata (cosntantes), .data (variables globales static inicializadas), .bss (variables globales static NO inicializadas):
+Mapa de memoria de un proceso. Dividido en segmentos. Las importantes: .text (intrucciones), .rodata (cons1tantes), .data (variables globales static inicializadas), .bss (variables globales static NO inicializadas):
 //int numero = 21; // .data
 //int resultado; // .bss
 //const char *msg = "Hola\n"; // .rodata
@@ -80,9 +80,13 @@ int main(void)
     return 0; // Va a .text
 }
 // Con {readelf programa} se lee un .elf y con -l se ven los segmentos.
-// Te dice donde esta cada segmento con su offset en hexadecimal, el tamaño, los permisos (por ejemplo .txt es de solo // lectura y ejecutable; .rodata es de solo lectura y no ejecutable). Hay una tabla para rellenar con los datos sacados de // este comando.
-// Podemos ver las cosas que hemos visto de la memoria de un procesos podemos ir al directorio del proceso. Viendo maps para // ver las listas de paginas y map_files. Tambien esta pagemap para ver las traducciones para ver en que marco de MF esta // pero esta en binario y yo no se tu pero no se leer binario.
-// En map_files por columnas: direccion virtual-permisos-offset(desplazamiento desde el principio, raras por seguridad)-// // dispositivo(manor-minor?)(por si hubiese que recuperar cosas)-inodo-path(que lo respalda). Si no hay path son anonimas, // // solo estan en memoria, si se pierden se pierden. Se ven las librerias compartidas tambien, eh heap y el stack y se ve que
+// Te dice donde esta cada segmento con su offset en hexadecimal, el tamaño, los permisos (por ejemplo .txt es de solo
+// lectura y ejecutable; .rodata es de solo lectura y no ejecutable). Hay una tabla para rellenar con los datos sacados de
+// este comando.
+// Podemos ver las cosas que hemos visto de la memoria de un procesos podemos ir al directorio del proceso. Viendo maps para // ver las listas de paginas y map_files. Tambien esta pagemap para ver las traducciones para ver en que marco de MF esta
+// pero esta en binario y yo no se tu pero no se leer binario.
+// En map_files por columnas: direccion virtual-permisos-offset(desplazamiento desde el principio, raras por seguridad)- // dispositivo(manor-minor?)(por si hubiese que recuperar cosas)-inodo-path(que lo respalda). Si no hay path son anonimas,
+// solo estan en memoria, si se pierden se pierden. Se ven las librerias compartidas tambien, eh heap y el stack y se ve que
 // el stack crece hacia arriba porque la diferencia de direcciones es grande y lo mismo con el heap.
 // En maps, regiones de memoria. Mirando desde maps y metiendonos en este directorio y usando... Se le ha acabado el tiempo, // como no hemso recompilado el programa el offset no ha cambiado pero las paginas virtuales son distintas... {sudo strings // (de la ruta donde sabemos que esta por ejemplo .rodata)} podemos ver "El resultado es:\n" y "%s%i\n" entre otras cosas que // tiene .rodata. Si pones al {strings} el .elf pues te muestra todo y entre todo el batiburrillo y en la posicion a partir
 // del offset pues efectivamente te vuelves a encontrar las cosas de .rodata.
@@ -105,18 +109,22 @@ MUNMAP: para liberar memoria. No se asegura la sincronizacion de la memoria. Par
 
 int main(int argc, char *argv[])
 {
-    int factor    = atoi(argv[1]);
-    int elementos = factor * 1024;
-    printf("Inicializando región de memoria\n");
-    int * ptr = (int *) malloc(elementos * sizeof(int));
-    for (size_t i = 0; i < elementos; i++){
-        ptr[i] = 1;
-    }
-    sleep(600);
-    return 0;
+	int factor = atoi(argv[1]);
+    	int elementos = factor * 1024;
+
+    	printf("Inicializando región de memoria\n");
+
+    	int * ptr = (int *) malloc(elementos * sizeof(int));
+    	for (size_t i = 0; i < elementos; i++)
+	{
+        	ptr[i] = 1;
+    	}
+
+    	sleep(600);
+    	return 0;
 }
 // Al trazar las llamadas al con {strace} al llamar al programa, el malloc no hace nada porque es muy poca memoria la que se
-// esta pidiendo.El puntero que esta devoviendo no esta al principio del heap porque seguramente la libc tenga algo cargado
+// esta pidiendo. El puntero que esta devolviendo no esta al principio del heap porque seguramente la libc tenga algo cargado
 // ahi. Puede pedir el numero de direcciones que se reservan para la pila al principio. Restar y ya y dividir entre lo que
 // ocupe cada direccion. Malloc con poca memoria te lo coge del heap, si pides mas llama a mmap para mappear memoria para
 // darte y devuelve el puntero a esa zona para luego poder liberarla. Malloc siempre deja algo de espacio antes de donde te
@@ -180,7 +188,8 @@ int main(int argc, char *argv[])
 	// Preparacion del segmento de memoria. Para ello:
 	// (1) Mapa compartido.
 	// (2) Abrir fichero para poder mappearlo.
-	// (3) Tamaño del fichero adecuado. 5 procesos * 5 escrituras = 25, demosle 30 porque si. (+5 porque el padre 	// escribe tambien).
+	// (3) Tamaño del fichero adecuado. 5 procesos * 5 escrituras = 25, demosle 30 porque si. (+5 porque el padre
+	// escribe tambien).
 	// (4) Llamar a mmap del fichero.
 
 
@@ -250,6 +259,8 @@ int main(int argc, char *argv[])
 // Respecto a rendimiento, esto es mejor.
 -----------------------------------------------------------------------------------------------------------------------------
 CACHE DE PAGINAS:
+-----------------------------------------------------------------------------------------------------------------------------
+
 
 
 
