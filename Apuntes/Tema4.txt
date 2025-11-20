@@ -258,9 +258,59 @@ int main(int argc, char *argv[])
 // Respecto a llamadas al sistema este codigo hace menos (exit). Respecto a escritura en disco respecto a write, es igual.
 // Respecto a rendimiento, esto es mejor.
 -----------------------------------------------------------------------------------------------------------------------------
-CACHE DE PAGINAS:
+CACHE DE PAGINAS: mecanismo para acelerar las lecturas y escrituras de disco.
 -----------------------------------------------------------------------------------------------------------------------------
+GESTION DE LA MEMORIA PRINCIPAL:
+Asignacion de Marcos de Pagina: Sistema encargado de buscar marcos de apginas libres para nuevos segmentos. Algcortimo mas comun el Binary Buddie porque usa potencias de 2 para organizar marcos continuos (2^orden). Cuando no hay un region del orden que le has pedido buscar otros ordenes, si es superior se divide en dos buddies dandote uno de ellos y colocando el otro en la lista de regiones libres en su orden correspondiente tras partirlo. Si pides 2 pags y el orden mas cercano el de 3 (8 pags continuas) las va partiendo hasta que te da una de 2 guardando las otras en los ordenenes correspondientes.
+Cuando no hay marcos libres hay que determinar cual debe liberarse mediante politicas de reemplazamiento cuyo objetivo es minimizar los fallos de pagina posibles y eliminando las paginas que no se volveran a usar (la que quitamos se usa muy poco o no se usa entonces perfecto para reemplazarla); hay algunas paginas que no se pueden reeemplazar (politica de retencio) como la del Kernel del SO, o procesos priviliegiados puede hacer [mlock()] para guardar paginas, todo esto por el tiempo (al pinnear paginas en memoria pues se tardaria los mismo siempre) y por seguridad; y ambito, local o global, el local solo puede reemplazarse un marco asignado al proceso que causa el fallo o global que se reemplaza cualquier marco. Algoritmos: FIFO (First In First Out), Reloj (FIFO mas vidas en lista circual) y LRU (Last Recent Used).
+-----------------------------------------------------------------------------------------------------------------------------
+LINUX:
+En Linux se juntan cosas, hay una cola de paginas recientemente usadas con Reloj y otra de inactivas que son las que se priorizan para sacar con politica FIFO. 
+Hay paginas mappeadas (cache de paginas (activas e inactivas)) y anonimas. Hay un demonio que se encarga de hacer esto (ksawp en Linux). Hay un parametro swappiness que es la frecuencias en la que vuelvas las paginas anonimas a swap (suele estar en 60, 60% de elegir anonimas al swappear).
+Out of Memory (OOM) killer:
+Mecanismo del nucleo que se usa cuando no se pueden satisfacer las peticiones de asignacion de memoria (incluso despues de reclamar paginas). Se prioriza terminar procesos malos (badness) que se liberara de la memoria. Heuristica de la politica de maldad: cuanta mas memoria use, cuantos mas hijos, cuanto mas nice (menos prioridad no mas bueno) mas malo es y cuanto mas tiempo lleve el proceso mas ajuste. oom_score para guardar esa puntuacion de [0, 1000], caunta mas puntuacion mas malo y por ende se va ates. oom_score_adj para ajustar la puntuacion anterior como para salvar,se lo puedes dar tu y va entre [-1000, 1000].
+-----------------------------------------------------------------------------------------------------------------------------
+Podemos hacer {cat /proc/meminfo} para ver la info de la memoria, cuanta memoria total hay, memoria disponible, paginas activas e inactivas anonimas y no anonimas, cache, etc en kBs. {vmstat X} para ver los movimientos de la memoria cada X tiempo. {swapon} para ver las particiones de memoria usadas y no usadas, recomendable por el profesor para poder llevar cosas a disco. {top} tambien tiene estadisticas de la memoria. {htop} mas bonito y "grafiquitos"
+-----------------------------------------------------------------------------------------------------------------------------
+Ejercicio 6 hoja 4:
+Memoria paginada con 512 paginas de MV. = 2^9 paginas => 9 bits.
+Direcciones: 512 palabras. = 9 bits para refenrenciar cada palabra (2^9)
+MP: 10 marcos. => 4 bits
 
+Direcciones virtuales de 18 bits (9 para el numero de pagina y 9 para las palabras en pag).
+Direcciones fisicas de 13 bits (4 para los marcos de MP y los 9 ultimos iguales a las direcciones virtuales).
+
+Forma: 0-512 filas|Marco fisico(4bits)|bitValidez(opresencia)(esta en MP o no)|RWX|Ref(referenciada o no)|modificada
+(como minimo deberia tener 4(los marcos)+1(bit de validez) y luego le podemos añadir los que queramos).
+
+0x13FF = 0001 0011 1111 1111
+Desplazamiento los 9 ultimos, los 9 primeros la pag virtual
+
+La pagina 9 corresponde al marco fisico 4.
+(...)
+Puede pasar que no forme parte de la MV => violacion de segmento.
+O V=0 => traer swap.
+-----------------------------------------------------------------------------------------------------------------------------
+Ejercicio 8 hoja 4:
+Ocupacion:
+CPU: 15% (usuario) 3% (sistema).
+SWAP: 92%.
+N procesos: 50 (estado SLEEP no interrumpido).
+Sacamos las conlusiones de que la CPU no esta haciendo casi nada y que hay muchas paginas en pag (hemos movido muchas pags de MP a swap) => memoria muy ocupada, confirmado porque hay mucho procesos. (Esperando pags de mv hagan swap->mem?)
+
+-Aumentar la Memoria => Impacto positivo porque posibilita que haya mas procesos haciendo swap lo que haria que se pudiese usar mas la CPU.
+-Mas programas => Imapacto negativo, mas programas, mas procesos implica que acabarian en el estado de espera y acabariamos peor y con el mismo uso de la CPU.
+-Aumentar la swap => impacto nulo/negativo.
+-Añadir mas CPU => impacto nulo.
+-----------------------------------------------------------------------------------------------------------------------------
+Como aclaracion la memoria swap es una particion de memoria secundaria.
+-----------------------------------------------------------------------------------------------------------------------------
+Ejercicio 9 hoja 4:
+1) Excepcion del MMU.
+2) la paguna es solo R=1 W=0 (.rodata) =>SIGSEG
+3) La pagina COW (Copy On Write)
+4) copiar (asignacion) y actualizar TP.
+-----------------------------------------------------------------------------------------------------------------------------
 
 
 
