@@ -311,7 +311,13 @@ Ejercicio 9 hoja 4:
 3) La pagina COW (Copy On Write)
 4) copiar (asignacion) y actualizar TP.
 -----------------------------------------------------------------------------------------------------------------------------
+Ejercicio 10 hoja 4:
+128 * 4 bytes = 2^7 * 2^2 = 512 bytes.
 
+Violacion de segmento tras hacer M[200] siendo M[128] -> Falso.
+Ejecucion corrompe los datos de la pila -> Verdadero.
+Ejecucion corrompe el semento de codigo de programa -> Falso.
+Si bucle hace 4096 para recorrer M habra excepcion -> Verdadero.
 
 
 
