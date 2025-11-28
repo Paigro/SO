@@ -105,7 +105,7 @@ typedef struct _thread_info_t
 
 typedef struct _suma_p_t
 {
-	pthread_mutex_t mutex; // Mutes para proteger el valor.
+	pthread_mutex_t mutex; // Mutex para proteger el valor.
 	int suma;
 } suma_p_t;
 
@@ -182,7 +182,7 @@ typedef struct _thread_info_t
 
 typedef struct _shared_int_t
 {
-	pthread_rwlock_t mutex; // Mutes para proteger el valor.
+	pthread_rwlock_t mutex; // Mutex para proteger el valor.
 	int valor;
 } shared_int_t;
 
@@ -290,7 +290,7 @@ typedef struct _thread_info_t
 
 typedef struct _shared_int_t
 {
-	pthread_rwlock_t mutex; // Mutes para proteger el valor.
+	pthread_rwlock_t mutex; // Mutex para proteger el valor.
 	int valor;
 } shared_int_t;
 
