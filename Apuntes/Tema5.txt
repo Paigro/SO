@@ -32,7 +32,7 @@ ptrehad_create(pthread_t(sacado de [pthread_self()(3), tipo opaco que no tendrem
 ]. El thread termina cuando acabe la funcion start, se llame a pthread_exit, sea cancelado por pthread_cancel()(3)(no usar, sincronizar mejor) o el proceso termina. Por defecto los threads se crean como PHREAD_CREATE_JOINABLE como se hacia con los procesos al hacer el [wait()] con [pthread_koin(pthread_t thread, void **retval)], tambien pueden ser PHREAD_CREATE_DETACHED.
 -----------------------------------------------------------------------------------------------------------------------------
 //Ejercicio 1 hoja 5:
-#include <stduio.h>
+#include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -41,15 +41,15 @@ ptrehad_create(pthread_t(sacado de [pthread_self()(3), tipo opaco que no tendrem
 typedef struct _thread_info_t
 {
 	int num; // ID nuestro.
-	phread_t id; // ID de POSIX.
+	pthread_t id; // ID de POSIX.
 } thread_info_t;
 
 void* haz_thread(void *_info)
 {
-	thread_info_t *info = (thread_info_t*) _info // Casting para poder utilizarlo.
-	printf("Thread %i, sleeping...\n", info->id);
-	sleep(info->num);
-	return;
+	thread_info_t *info = (thread_info_t*) _info; // Casting para poder utilizarlo.
+    printf("Thread %i, sleeping...\n", info->num);
+	sleep(info->num * 1000);
+	return NULL; 
 }
 
 int main(int argc, char *argv[])
@@ -59,19 +59,19 @@ int main(int argc, char *argv[])
 	thread_info_t *pool = (thread_info_t*) malloc (nThreads * sizeof(thread_info_t)); // Para definir un array dinamico.
 	
 	// Crear los threads y guardar su informacion.
-	for(int i = 0; i < nThread; ++i)
+	for(int i = 0; i < nThreads; ++i)
 	{
 		pool[i].num = i;
-	
-		pthread_create(&pool[i].id, 0, haz_thread, (void*) &poll[i]);
-		//pthread_create(&pool[i].id, NULL, haz_thread, (void*) &poll[i]); // Igual que lo anterior.
+
+		pthread_create(&pool[i].id, 0, haz_thread, (void*) &pool[i]);
+		//pthread_create(&pool[i].id, NULL, haz_thread, (void*) &pool[i]); // Igual que lo anterior.
 	}
 	
 	// Sincronizar los threads.
-	for(int i = 0; i < nThread; ++i)
+	for(int i = 0; i < nThreads; ++i)
 	{
-		//pthread_join(pool[i].id, NULL); // NULL porque no esperamos nada de retorno.
-		printf("Thread %i termino\nj", pool[i].num);
+		pthread_join(pool[i].id, NULL); // NULL porque no esperamos nada de retorno.
+		printf("Thread %i termino\n", pool[i].num);
 
 	}
 
@@ -256,23 +256,29 @@ int main(int argc, char *argv[])
 VARIABLES DE CONDICION: abstraccion para bloquear y depertetar threads segun la evaluacion de un predicado sobre variables compartidas. Cuando se hace esto se juntan 3 cosas: estado compartido, un mutex y un preidcado a evaluar (uno o varios sobre un mismo estado compartido).
 Patron productor-consumidor: conjunto de threads productores de datos y otro conjunto de consumidores que los recogen y los procesan.
 -----------------------------------------------------------------------------------------------------------------------------
-//Ejercicio X hoja 5?
-#include <stduio.h>
+//Ejercicio 4 hoja 5?
+#include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <stdlib.h>
 
 
-#define BUFFER_SIZE = 10
-#define NUM_ELEMENTOS_A_PRODUCIR = 5
+#define BUFFER_SIZE 10
+#define NUM_ELEMENTOS_A_PRODUCIR 5
 
-typedef struct _buffet_t
+typedef struct _thread_info_t
 {
-	prhtread_mutex_t mutex;
+	int num; // ID nuestro.
+	pthread_t id; // ID de POSIX.
+} thread_info_t;
+
+typedef struct _buffer_t
+{
+	pthread_mutex_t mutex;
 
 	// Variables de condicion, tantas como predicados haya.
-	pthread_con_t produce; // Si se puede producir o no. (elements < buffer_size).
-	pthread_con_t produce; // Si se puede consumir o no. (elements > 0).
+	pthread_cond_t produce; // Si se puede producir o no. (elements < buffer_size).
+	pthread_cond_t consume; // Si se puede consumir o no. (elements > 0).
 
 	int data[BUFFER_SIZE];
 
@@ -282,19 +288,13 @@ typedef struct _buffet_t
 	int nElements;
 } buffer_t;
 
-typedef struct _thread_info_t
-{
-	int num; // ID nuestro.
-	phread_t id; // ID de POSIX.
-} thread_info_t;
-
 typedef struct _shared_int_t
 {
 	pthread_rwlock_t mutex; // Mutex para proteger el valor.
 	int valor;
 } shared_int_t;
 
-buffet_t buffer = { PTHREAD_MUTEX_INITIALIZER, // Mutex.
+buffer_t buffer = { PTHREAD_MUTEX_INITIALIZER, // Mutex.
 			PTHREAD_COND_INITIALIZER, // Produce.
 			PTHREAD_COND_INITIALIZER, // Consume.
 			0, // In.
@@ -303,12 +303,12 @@ buffet_t buffer = { PTHREAD_MUTEX_INITIALIZER, // Mutex.
 
 void* productor(void *_info)
 {
-	thread_info_t *info = (thread_info_t*) _info // Casting para poder utilizarlo.
+	thread_info_t *info = (thread_info_t*) _info; // Casting para poder utilizarlo.
 
 	for(int i = 0; i < NUM_ELEMENTOS_A_PRODUCIR; ++i)
 	{
 		pthread_mutex_lock(&buffer.mutex); // Entrar a la region critica.
-		while(buffer.nelements == BUFFER_SIZE) // Normalmente para esperar se pone la condicion negada.
+		while(buffer.nElements == BUFFER_SIZE) // Normalmente para esperar se pone la condicion negada.
 		{
 			pthread_cond_wait(&buffer.produce, &buffer.mutex); // Esperar.
 		}
@@ -327,12 +327,12 @@ void* productor(void *_info)
 
 		sleep(1); // Esperar para que no intente ir otra vez a por el mutex inmediatamente.
 	}
-	return;
+	return NULL;
 }
 
 void* consumidor(void *_info)
 {
-	thread_info_t *info = (thread_info_t*) _info // Casting para poder utilizarlo.
+	thread_info_t *info = (thread_info_t*) _info; // Casting para poder utilizarlo.
 
 	while(1)
 	{
@@ -353,7 +353,7 @@ void* consumidor(void *_info)
 		pthread_mutex_unlock(&buffer.mutex);
 		
 	}
-	return;
+	return NULL;
 }
 
 int main(int argc, char *argv[])
@@ -363,20 +363,20 @@ int main(int argc, char *argv[])
 
 	thread_info_t *pool = (thread_info_t*)  malloc((productores + consumidores) * sizeof(thread_info_t)); 
 	
-	for(int i = 0; i < escritores; ++i)
+	for(int i = 0; i < productores; ++i)
 	{
 		pool[i].num = 0;
-		pthread_create(&(pool[i].id, NULL, productores, (void*) &pool[i]);
+		pthread_create(&pool[i].id, NULL, productor, (void*) &pool[i]);
 	}
 
 	for(int i = productores; i < (productores + consumidores); ++i)
 	{
 		pool[i].num = i - productores;
-		pthread_create(&(pool[i].id, NULL, consumidor, (void*) &pool[i]);
+		pthread_create(&pool[i].id, NULL, consumidor, (void*) &pool[i]);
 	}
 
 	// Sincronizar los threads.
-	for(int i = 0; i < (escritores + lectores); ++i)
+	for(int i = 0; i < (productores + consumidores); ++i)
 	{
 		pthread_join(pool[i].id, NULL); // NULL porque no esperamos nada de retorno.
 		printf("Thread %i termino\nj", pool[i].num);
@@ -385,7 +385,6 @@ int main(int argc, char *argv[])
 	free(pool); // Liberar memoria.
 	return 0;
 }
-
 
 
 
