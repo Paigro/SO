@@ -91,6 +91,7 @@ En POSIX se declaran con mutex (MUTual EXclusion). Tienen dos estados (lock y un
 -----------------------------------------------------------------------------------------------------------------------------
 // Work Crew: los threads cooperan mediante la ejecucion independiente de tareas, la tarea por cada thread puede ser // diferente. Requieren la sincronizacion en los datos de entrada y salida de las tareas. Calculo de fisicas o Web Servers.
 //Ejercicio 2 hoja 5:
+#include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <stdlib.h>
