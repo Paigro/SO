@@ -386,7 +386,7 @@ int main(int argc, char *argv[])
 	return 0;
 }
 -----------------------------------------------------------------------------------------------------------------------------
-//Ejercicio 4 hoja 5 con PILDORA.
+//Ejercicio 4 hoja 5 con PILDORA. (Ejercicio 5 hoja 5)
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
