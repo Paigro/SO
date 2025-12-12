@@ -1,0 +1,22 @@
+-----------------------------------------------------------------------------------------------------------------------------
+EXAMEN
+-----------------------------------------------------------------------------------------------------------------------------
+Maximo 3 horas todo en el laboratorio. Aprox 1/2 para teoria/practica. Teoria sin nada y practica con chuleta con comandos con breve explicacion y funciones.
+Tiene que sumar ambas partes 5.
+-----------------------------------------------------------------------------------------------------------------------------
+Le gustan mas preguntas cortas.
+-----------------------------------------------------------------------------------------------------------------------------
+Teoria: 8 preguntas aprox (2 por tema sin tema 1). 5 puntos.
+-Tema 1: No.
+-Tema 2: ejercicios practicos (como poner un salida y decir cosas de ella) y teoria. Directorios, enlaces, permisos, inodos. Diapostivas importantes: 5, 6, 7, 8, 9, 12, 13, 23, 24 (E18), 26, 27, FAT y demas en ejercicio (E10, E11, E16, E17). Arboles balanceados no entran.
+-Tema 3: Identificadores. Tabla de descriptores (practicos). No saber funciones pero si los atributos como los identificadores y que son. Contexto de ejecucion. Creacion de procesos solo saber como se crean alomejor pone como se hace en la chuleta del practico. Alomejor pone un trozo de programa y decir cual es la salida. Que es el proceso init y cual es su funcion. Que son la señales y la gestion de los procesos de ellas (D21: primera mitad de la diapositiva). Los grupos de procesos, sesiones y eso van en practica. Planificacion no va a preguntar de rellenar como los que hizo en clase, entonces teoria: cuando se ejecuta el planificador del SO (D28), que eventos hay para activar el planificador, cambio de contexto, que es un planificador expropiativo y no exporpiativo, no ejercicios de Shortest Job First (alomejor solo las caracteristicas de ello y para que es bueno), planificador de Linux teoria (D38).
+-Tema 4: Que es la MV y todo eso (lo puede preguntar como ejercicio). Tabla de paginas teoria (D7). TLV y MMU teoria (D8). Hasta la D10 todo teoria menos la primera parte del tema que puede ser como el E6. Huge Pages (D10) el cuadradito de abajo. Se pregunta mucho de forma practica como el E1 o E2 lo de las partes del codigo (D13). D20 teoria. D21 para que sirven los flags por ejemplo. Gestion de bloques de memoria teoria (describir los algortimos de gestion) (no le gusta mucho esta parte no va a poner las tablas). Si saber como se gestionan los fallos de paginas, el OOM si se puede pregunta (D30-31).
+-Tema 5: las primeras diapositivas probable. Que es un thread y como se compara con un proceso. Y el resto del tema quitando las ultimas diapositivas (D31 mecanismos) es todo del examen practico. Estudiarse bien las ultimas diapositivas dicho por Rubens.
+-----------------------------------------------------------------------------------------------------------------------------
+Practica: 4 preguntas. 1 de bash y 3 de programacion.
+-Tema 1: va preguntar algo. O como el E2 o hacer un script en bash. Usar comandos y demas.
+-Tema 2: como los E4 (simular stat), E8 (copias con dd) y E9 (recorrer directorio y excribir algo). Si pide algo de esto alomejor solo pide 1, 2 apartados no enteros. No va a rehacer ejercicios, simplificara los de la hoja.
+-Tema 3: como los E5 (programa crea otro), E9 (parecido y espera a que termine) y E11 (crea hijos y escribe cada uno). Estos no se pueden cambiar mucho alomejor caen tal cual.
+-Tema 4: como los E1 (es muy importante este ejercicio en general tanto para el examen teorico como para el practico), E3 (crear un mapa de memoria e inicializarlo y demas) y E4 (mapeaba un fichero sin crear procesos).
+-Tema 5: como los E3 (suma paralela), E4+5 (productor-consumidor) y E6 (lector-escritor). Uno de estos pero simplificados para que de tiempo. Alomejor puede hacer preguntas para sacar algo de puntos de la esctructura. Tienen que compilar los programas. No se quiere poner imaginativo. Tiene buen corazon y alomejor mirara los programas que no compilen pero no ir con esa expectativa.
+-----------------------------------------------------------------------------------------------------------------------------
