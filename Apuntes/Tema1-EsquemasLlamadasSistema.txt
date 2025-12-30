@@ -1,4 +1,4 @@
-TEMA 1: parte deesquemas de uso de llamadas al sistema.
+TEMA 1: parte de esquemas de uso de llamadas al sistema.
 //Terminal:
 man 2 uname // Saca la llamada al sistema del comando. Importante el return value. Al fallo devuelve -1.
 -----------------------------------------------------------------------------------------------------------------------
@@ -68,5 +68,3 @@ Hay codigo de ejemplo en las paginas del manual.
 -----------------------------------------------------------------------------------------------------------------------
 FIN TEMA 1.
 -----------------------------------------------------------------------------------------------------------------------
-
-
