@@ -18,5 +18,6 @@ Practica: 4 preguntas. 1 de bash y 3 de programacion.
 -Tema 2: como los E4 (simular stat), E8 (copias con dd) y E9 (recorrer directorio y excribir algo). Si pide algo de esto alomejor solo pide 1, 2 apartados no enteros. No va a rehacer ejercicios, simplificara los de la hoja.
 -Tema 3: como los E5 (programa crea otro), E9 (parecido y espera a que termine) y E11 (crea hijos y escribe cada uno). Estos no se pueden cambiar mucho alomejor caen tal cual.
 -Tema 4: como los E1 (es muy importante este ejercicio en general tanto para el examen teorico como para el practico), E3 (crear un mapa de memoria e inicializarlo y demas) y E4 (mapeaba un fichero sin crear procesos).
--Tema 5: como los E3 (suma paralela), E4+5 (productor-consumidor) y E6 (lector-escritor). Uno de estos pero simplificados para que de tiempo. Alomejor puede hacer preguntas para sacar algo de puntos de la esctructura. Tienen que compilar los programas. No se quiere poner imaginativo. Tiene buen corazon y alomejor mirara los programas que no compilen pero no ir con esa expectativa.
+-Tema 5: como los E3 (suma paralela), E4+5 (productor-consumidor) y E6 (lector-escritor). Uno de estos pero simplificados para que de tiempo. Alomejor puede hacer preguntas para sacar algo de puntos de la esctructura.
+Tienen que compilar los programas. No se quiere poner imaginativo. Tiene buen corazon y alomejor mirara los programas que no compilen pero no ir con esa expectativa.
 -----------------------------------------------------------------------------------------------------------------------------

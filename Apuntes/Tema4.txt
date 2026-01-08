@@ -45,11 +45,11 @@ configurar con {madvise(2)} para decirle lo que vas a hacer con la memoria del p
 -Huge Pages: se puede reservar al arrancar el Sistema una pool de paginas de 2mB o 1gB que las aplicacines pueden solicitar. 
 Para bases de datos son interesantes o cuando iniciamos la Maquina Virtual.
 -----------------------------------------------------------------------------------------------------------------------------
-Mapa de memoria de un proceso. Dividido en segmentos. Las importantes: .text (intrucciones), .rodata (cons1tantes), .data (variables globales static inicializadas), .bss (variables globales static NO inicializadas):
+Mapa de memoria de un proceso. Dividido en segmentos. Las importantes: .text (intrucciones), .rodata (constantes), .data (variables globales static inicializadas), .bss (variables globales static NO inicializadas):
 //int numero = 21; // .data
 //int resultado; // .bss
 //const char *msg = "Hola\n"; // .rodata
-//static in factor = 2; // (dentro de main) .data
+//static int factor = 2; // (dentro de main) .data
 //while(...){ if(...) } // .text
 Segmentos de memoria: son areas de memoria contigua con varias paginas de MV (la estructura en Linux es vm_area_struct, que tiene tipo y permisos). Tipos: respaldadas por fichero (si no tiene son anonimas (no respaldadas por un fichero), heap, stack, memoria dinamica), privadas accesibles por solo el proceso o compartidas y accesibles por otros procesos. El heap crece hacia direcciones altas (del 0 al F) y la pila crece hacia direcciones bajas (del F al 0). En el mapa de memoria del procesos esta mapeado el kernel abajo del todo (abajo hacia arriba, las FFs), no es accesible por el usuario. Esta mappeado en todos los procesos para facilitar la llamada a las funciones del sistema. Despues de que algo pasase, las tablas de paginas de traducciones se separan para dar mas porteccion a los programas que de repente podian ver la TLB, entonces ahora mas seguro tras ese parche pero provoca mas fallos de TLB, cosa pocha pero segura. Esto se puede desactivar.
 Si un segmento esta respaldado por un fichero, tiene un puntero que contiene el inodo, dentry y address_space. Ademas los segmentos tienen unas flags, unas operaciones (open(), close(),...)
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 	void * ptr = mmap (NULL, // Origen.
 			1024, // Tamaño.
 			PROT_READ | PROT_WRITE, // Permisos de lectura y escritura.
-			MAP_PRIVATE | MAP_ANOM, // Flags de que es memoria privada y anonima.
+			MAP_PRIVATE | MAP_ANON, // Flags de que es memoria privada y anonima.
 			-1, // Archivo.
 			0) // Offset.
 
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 	}
 
 	memset(ptr, 0, 1024);
-	printfI("PID: %i, VMA: %p\n", getpid(), ptr());
+	printfI("PID: %i, VMA: %p\n", getpid(), ptr);
 
 	sleep(6000);
 

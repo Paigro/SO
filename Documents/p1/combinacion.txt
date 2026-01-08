@@ -1,0 +1,10 @@
+
+zorro
+pajaro
+vaca
+caballo
+abeja
+pera
+manzana
+platano
+ciruela

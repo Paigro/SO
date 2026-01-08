@@ -116,7 +116,7 @@ void* haz_thread(void *_info)
 	thread_info_t *info = (thread_info_t*) _info // Casting para poder utilizarlo.
 
 	int suma_parcial = 0;
-	int ini = info->tb * info->sum;
+	int ini = info->tb * info->num;
 	int fin = info->tb * (info->num + 1);
 
 	printf("Thread %i, sumando...%i - %i\n", info->num, ini, fin);
@@ -126,7 +126,7 @@ void* haz_thread(void *_info)
 		suma_parcial += i;
 	}
 
-	pthread_mutex_ock(&suma.mutex); // Bloqueamos el mutex.
+	pthread_mutex_lock(&suma.mutex); // Bloqueamos el mutex.
 
 	suma.suma = suma.suma+suma.suma_parcial; 	// Asi se haria sin mutex que tendria un problema de sincronizacion.  							// Porque nada te asegura que sea atomico.
 	pthread_mutex_unlock(&suma.mutex); // Desbloquear el mutex.

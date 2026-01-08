@@ -125,7 +125,7 @@ tambien con & al ejecutar un comando lo manda al background directamente. Si no 
 actua sobre el proceso que tenga el '+' (se ve al llamar a {jobs}). Tambien hay un '-' que es que cuando desaparezca el que
 tiene el '+' es el que se pone el '+'.
 -----------------------------------------------------------------------------------------------------------------------------
-//Ejercicio 11 y 12 hoja 3: la repsuesta al 12 es no. Si se usa el mismo descriptor de escritura se escribiria  en desorden
+//Ejercicio 11 y 12 hoja 3: la respuesta al 12 es no. Si se usa el mismo descriptor de escritura se escribiria  en desorden
 //creo.
 #define NUM 5
 
