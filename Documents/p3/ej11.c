@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
                 exit(EXIT_FAILURE);
                 break;
             case 0: // Caso hijo.
-                printf("[Hijo %i] PID: %i\n", i, pid);
+                printf("[Hijo %i] PID: %i\n", i, getpid());
                 writeInOut(i + 1); // Lamamos a la funcion, como i empienza en 0 lo llamamos con +1.
                 exit(i);
                 break;

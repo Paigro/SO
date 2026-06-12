@@ -37,7 +37,7 @@ buffer_t buffer =   {PTHREAD_MUTEX_INITIALIZER, // Mutex para proteger el buffer
 
 void* productor(void* _info)
 {
-    thread_info_t* info = (thread_info_t*) _info; // casteamos el puntero void a thread_info_t.
+    thread_info_t* info = (thread_info_t*) _info; // Casteamos el puntero void a thread_info_t.
 
     for (int i = 0; i < P_ELEMENTS; i++) {
         // ENTRADA A REGION CRITICA.
@@ -100,10 +100,11 @@ void* consumidor(void* _info)
     }
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     // Primer argumento es el numero de productores.
     int p = atoi(argv[1]);
-    // Segundo argumento es el tamaño de consumidores.
+    // Segundo argumento es el numero de consumidores.
     int c = atoi(argv[2]);
 
     // reservamos memoria para los threads "malloc(nt * sizeof(thread_info_t))".

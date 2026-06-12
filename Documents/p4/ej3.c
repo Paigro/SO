@@ -11,7 +11,7 @@
 #define SIZE 1024
 
 
-int main(int argc, char* argv)
+int main(int argc, char* argv[])
 {
     void* ptr = mmap(NULL, // Origen.
                         SIZE, // Tam.
@@ -27,7 +27,10 @@ int main(int argc, char* argv)
         return EXIT_FAILURE;
     }
 
-    memset(ptr, 0, SIZE);
+    // Escribir lo que pide el enunciado.
+    memset(ptr, // Desde donde.
+            0, // El que escribir. 
+            SIZE); // Cuantos bytes se escriben.
     printf("PID: %i, VMA: %p\n", getpid(), ptr);
 
     sleep(600);

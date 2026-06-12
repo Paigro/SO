@@ -13,16 +13,17 @@
 #include <linux/limits.h>
 
 #define N_PROC 5
-#define SEG_SIZE (5 + N_PROC * 5)
+#define N_CHAR 5
+#define SEG_SIZE (N_CHAR + N_PROC * N_CHAR)
 
 
 // Recibe la region de memoria y el proceso.
 void write_char(void * _ptr, int proc)
 {
 	char* ptr = (char*) _ptr;
-    int offset = 5 + (proc - 1) * 5;
+    int offset = N_CHAR + (proc - 1) * N_CHAR; // Empezando en la posicion tras el padre, escribiremos a partir del n_proc * N_CHAR.
 
-	for(int i = 0; i < 5; ++i)
+	for(int i = 0; i < N_CHAR; ++i)
 	{
 		ptr[offset + i] = '0' + proc; // Esto te da el caracter ASCII. "Truquito".
 	}
@@ -49,7 +50,7 @@ int main(int argc, char *argv[])
     }
 
 	// (3) + comprobacion.
-	if (ftruncate(fd_out, SEG_SIZE) == -1)
+	if (ftruncate(fd_out, SEG_SIZE) == -1) // Truncamos el archivo al tam deseado.
     {
         perror("Error en ftruncate().");
         exit(EXIT_FAILURE);
@@ -57,7 +58,7 @@ int main(int argc, char *argv[])
 
 	// (4)
 	char* ptr = mmap (NULL, // Origen.
-			30, // Tam. Podria no ponerse el mismo tam del fichero.
+			SEG_SIZE, // Tam. Podria no ponerse el mismo tam del fichero.
 			PROT_READ | PROT_WRITE, // Permisos de lectura y escritura.
 			MAP_SHARED, // Flags de que es memoria compartida.
 			fd_out, // Archivo.
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
 
 	// Todo esto se tiene que hacer antes que los forks porque la memoria es compartida y hay que usar el ptr comun.
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < N_CHAR; i++)
     {
         ptr[i] = '0';
     }   
@@ -93,20 +94,20 @@ int main(int argc, char *argv[])
 	}
 
 	// Esperar a los 5 hijos.
-	for(int i = 0; i < 5; ++i)
+	for(int i = 0; i < N_PROC; ++i)
 	{
 		int status;
 		pid_t pid;
 		pid = wait(&status);
 
-		printf("HIJO: %d\n", status);
+		printf("HIJO con pid %d acabo con status: %d\n", pid, WEXITSTATUS(status)); // Si el hijo salio por signal pues se peina.
 	}
 
 	// Sincronizacion:
 	msync(ptr, SEG_SIZE, MS_SYNC);
 
 	// Liberar memoria.
-	munmap(ptr, SEG_SIZE    );
+	munmap(ptr, SEG_SIZE);
 
 	return EXIT_SUCCESS;
 }

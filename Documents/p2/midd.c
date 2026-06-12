@@ -75,7 +75,7 @@ int main(int argc, char * argv [])
         {
             int n_read = 0; // Numero de bytes leidos.
             n_read = read(fd_in, // Desde donde.
-                            buffer + (total_bytes + actual_bytes), // Donde.
+                            buffer + actual_bytes, // Donde.
                             block_size - actual_bytes); // Cuanto.
             
             // Si no leemos ningun byte adios.
@@ -94,7 +94,7 @@ int main(int argc, char * argv [])
         }
         else
         {
-            total_bytes += actual_bytes;
+            total_bytes += actual_bytes; // Sumamos los bytes al total.
         }
 
         // Escritura de un bloque.
@@ -112,7 +112,7 @@ int main(int argc, char * argv [])
                 break;
             }
 
-            write_bytes += n_write;
+            write_bytes += n_write; // Sumamos los bytes a la suma.
         }
     }
 
